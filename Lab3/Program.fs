@@ -20,7 +20,7 @@ let mutable prev = b0
 
 let geometricProgression = [|
     b0
-    for i in 1..n do
+    for i in 1..n - 1 do
         let next = prev * q
 
         prev <- next
@@ -37,12 +37,14 @@ printfn "Min: %A" (Seq.min geometricProgression)
 printfn "Max: %A" (Seq.max geometricProgression)
 printfn "Sum: %A" sum
 printfn "Arithmetic mean: %A" (sum / float n)
-printfn "Geometric mean: %A" ((Seq.reduce (fun prev current -> prev * current) geometricProgression) ** n)
+printfn "Geometric mean: %A" ((Seq.reduce (fun prev current -> prev * current) geometricProgression) ** (float 1 / float n))
 printfn "Median: %A" median
 
-let fileName = $"gp-{JsonSerializer.Serialize(DateTime.Now)}.txt"
-let file = File.Create fileName
+let filename = $"""{DateTime.Now.ToString("MM.dd_hh.mm.ss")}.txt""";
 
-File.WriteAllText fileName (JsonSerializer.Serialize(geometricProgression))
+using (File.Open(filename, FileMode.CreateNew)) (
+    fun fileStream ->
+        fileStream.Write(JsonSerializer.SerializeToUtf8Bytes(geometricProgression))
+)
 
-printfn $"Geometric progression saved to {fileName}"
+printfn $"Geometric progression saved to {filename}"
