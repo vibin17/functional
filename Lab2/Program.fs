@@ -7,7 +7,7 @@ open System.Text.RegularExpressions
 
 let numberPattern = "-?\d+(?:\.\d+)?"
 let coords = 
-    ((String.Empty, File.ReadAllLines(@"text.txt")) |> String.Join, $"\(({numberPattern}), ({numberPattern})\)")
+    ((String.Empty, File.ReadAllLines(@"text.txt")) |> String.Join, $"\(({numberPattern}),[ ]*({numberPattern})\)")
     |> Regex.Matches
     |> Seq.map (fun a ->
         let x = Double.Parse a.Groups[1].Value
