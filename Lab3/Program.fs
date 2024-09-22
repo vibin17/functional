@@ -37,10 +37,10 @@ printfn "Min: %A" (Seq.min geometricProgression)
 printfn "Max: %A" (Seq.max geometricProgression)
 printfn "Sum: %A" sum
 printfn "Arithmetic mean: %A" (sum / float n)
-printfn "Geometric mean: %A" ((Seq.reduce (fun prev current -> prev * current) geometricProgression) ** (float 1 / float n))
+printfn "Geometric mean: %A" ((Seq.fold (fun prev current -> prev * current) 1.0 geometricProgression) ** (float 1 / float n))
 printfn "Median: %A" median
 
-let filename = $"""{DateTime.Now.ToString("MM.dd_hh.mm.ss")}.txt""";
+let filename = $"""{DateTime.Now.ToString("MM-dd__HH-mm-ss")}.txt""";
 
 using (File.Open(filename, FileMode.CreateNew)) (
     fun fileStream ->
