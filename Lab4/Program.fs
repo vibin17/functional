@@ -6,10 +6,13 @@ open System;
 printfn "Enter a number"
 
 let n = bigint.Parse(Console.ReadLine())
-let rec factorialRecursive (n: bigint) : bigint = 
-    if n = bigint.One then n
-    else n * factorialRecursive(n - bigint.One)
 
-let factorial = factorialRecursive (n)
+if (n < bigint.Zero) then invalidOp("n < 0")
+
+let rec factorialRecursive (n: bigint, accumulator: bigint) : bigint = 
+    if n > bigint.One then factorialRecursive(n - bigint.One, accumulator * n)
+    else accumulator
+
+let factorial = factorialRecursive (n, 1)
 
 printfn "Factorial: %A" factorial
