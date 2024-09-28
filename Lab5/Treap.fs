@@ -1,6 +1,11 @@
 ﻿module Treap
 
-open System.Collections.Generic
+open System.Text
+
+type Node =
+    | Leaf of x: int * y: int
+    | WithLeftChild of x: int * y: int * left: Node
+    | WithRightChild of x: int * y: int * left: Node
 
 type Node internal (x: int, y: int, left: Node option, right: Node option) =
 
@@ -15,52 +20,43 @@ type Treap private (root: Node) =
     override this.ToString() =
          Treap.ToStringInternal root 0
 
-    static member public BuildTree(coords : (int * int)[]) : Treap option =
+    static member public Build(coords : (int * int)[]) : Treap option =
         let sortedCoords = Array.sortBy (fun (x, y) -> x) coords
-        let root = Treap.BuildTreeInternal (sortedCoords) 0 coords.Length
+        let root = Treap.BuildTreeInternal (sortedCoords)
 
         match root with 
         | None -> None
         | Some treeRoot -> Some(new Treap(treeRoot))
 
-    static member private BuildTreeInternal (coords: (int * int)[]) (start: int) (endIndex: int) : Node option =
-        if endIndex - start = 0 then
+    static member private BuildTreeInternal (coords: (int * int)[]) : Node option =
+        if coords.Length < 1 then
             None
-        elif endIndex - start <= 1 then
-           Some (Node(fst coords[start], snd coords[start], None, None))
         else
-            let mutable (rootX, rootY) = coords[start]
-            let mutable rootIndex = start
+            let root = Seq.maxBy(fun (x, y) -> (y, x)) coords
+            let rootIndex = Seq.findIndex ((=) root) coords
 
-            for i = start + 1 to endIndex - 1 do
-                let (x, y) = coords[i]
+            let left = coords[..rootIndex - 1]
+            let right = coords[rootIndex + 1..]
 
-                if y > rootY || (y = rootY && x < rootX) then
-                    (rootX, rootY) <- coords[i]
-                    rootIndex <- i
+            let leftSubtree = Treap.BuildTreeInternal left
+            let rightSubtree = Treap.BuildTreeInternal right
 
-            let leftSubtree = Treap.BuildTreeInternal coords start rootIndex
-            let rightSubtree =
-                if rootIndex + 1 < coords.Length then
-                    Treap.BuildTreeInternal coords (rootIndex + 1) endIndex
-                else
-                    None
-
-            Some (Node(rootX, rootY, leftSubtree, rightSubtree))
+            Some (Node(fst root, snd root, leftSubtree, rightSubtree))
 
     static member private ToStringInternal (node : Node) (currentGeneration : int) : string =
-        let stack = new Stack<
+        let builder = new StringBuilder()
 
-        let nodeString = sprintf " - Node(%d, %d)\n" node.X node.Y
-        let formattedNodeString = (String.replicate currentGeneration "\t") + nodeString
-        let leftString =
-            match node.Left with
-            | Some leftNode -> Treap.ToStringInternal leftNode (currentGeneration + 1)
-            | None -> ""
+        Treap.ToStringWalk builder node 0 |> ignore
 
-        let rightString =
-            match node.Right with
-            | Some rightNode -> Treap.ToStringInternal rightNode (currentGeneration + 1)
-            | None -> ""
+        builder.ToString()
 
-        formattedNodeString + leftString + rightString
+    static member private ToStringWalk (sb : StringBuilder) (node : Node) (currentGen : int)  =
+        let nodeString = String.replicate currentGen "\t" + $" - Node({node.X}, {node.Y})\n";
+            
+        sb.Append(nodeString) |> ignore
+        
+        if node.Left.IsSome then 
+            Treap.ToStringWalk sb node.Left.Value (currentGen + 1)
+
+        if node.Right.IsSome then 
+            Treap.ToStringWalk sb node.Right.Value (currentGen + 1)

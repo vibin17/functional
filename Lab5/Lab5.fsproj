@@ -6,8 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="text.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Compile Include="Treap.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
+
+  <ItemGroup />
 
 </Project>
