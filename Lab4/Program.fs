@@ -7,7 +7,7 @@ printfn "Enter a number"
 
 let n = bigint.Parse(Console.ReadLine())
 
-if (n < bigint.Zero) then invalidOp("n < 0")
+if (n < bigint.Zero) then invalidOp("n must be >= 0")
 
 let rec factorialRecursive (n: bigint, accumulator: bigint) : bigint = 
     if n > bigint.One then factorialRecursive(n - bigint.One, accumulator * n)
