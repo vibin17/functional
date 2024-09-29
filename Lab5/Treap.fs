@@ -3,16 +3,8 @@
 open System.Text
 
 type Node =
-    | Leaf of x: int * y: int
-    | WithLeftChild of x: int * y: int * left: Node
-    | WithRightChild of x: int * y: int * left: Node
-
-type Node internal (x: int, y: int, left: Node option, right: Node option) =
-
-    member val public X = x with get
-    member val public Y = y with get
-    member val public Left = left with get
-    member val public Right = right with get
+    | Empty
+    | Node of x: int * y: int * left: Node * right: Node
 
 type Treap private (root: Node) =
     member val public Root = root with get
@@ -20,17 +12,15 @@ type Treap private (root: Node) =
     override this.ToString() =
          Treap.ToStringInternal root 0
 
-    static member public Build(coords : (int * int)[]) : Treap option =
+    static member public Build(coords : (int * int)[]) : Treap =
         let sortedCoords = Array.sortBy (fun (x, y) -> x) coords
         let root = Treap.BuildTreeInternal (sortedCoords)
 
-        match root with 
-        | None -> None
-        | Some treeRoot -> Some(new Treap(treeRoot))
+        new Treap(root)
 
-    static member private BuildTreeInternal (coords: (int * int)[]) : Node option =
+    static member private BuildTreeInternal (coords: (int * int)[]) : Node =
         if coords.Length < 1 then
-            None
+            Empty
         else
             let root = Seq.maxBy(fun (x, y) -> (y, x)) coords
             let rootIndex = Seq.findIndex ((=) root) coords
@@ -41,7 +31,7 @@ type Treap private (root: Node) =
             let leftSubtree = Treap.BuildTreeInternal left
             let rightSubtree = Treap.BuildTreeInternal right
 
-            Some (Node(fst root, snd root, leftSubtree, rightSubtree))
+            Node (fst root, snd root, leftSubtree, rightSubtree)
 
     static member private ToStringInternal (node : Node) (currentGeneration : int) : string =
         let builder = new StringBuilder()
@@ -51,12 +41,11 @@ type Treap private (root: Node) =
         builder.ToString()
 
     static member private ToStringWalk (sb : StringBuilder) (node : Node) (currentGen : int)  =
-        let nodeString = String.replicate currentGen "\t" + $" - Node({node.X}, {node.Y})\n";
-            
-        sb.Append(nodeString) |> ignore
-        
-        if node.Left.IsSome then 
-            Treap.ToStringWalk sb node.Left.Value (currentGen + 1)
+        match node with
+        | Empty -> ()
+        | Node(x, y, left, right) ->
+            let nodeString = String.replicate currentGen "\t" + $" - Node({x}, {y})\n";
 
-        if node.Right.IsSome then 
-            Treap.ToStringWalk sb node.Right.Value (currentGen + 1)
+            sb.Append(nodeString) |> ignore
+            Treap.ToStringWalk sb left (currentGen + 1)
+            Treap.ToStringWalk sb right (currentGen + 1)

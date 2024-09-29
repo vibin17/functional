@@ -21,20 +21,16 @@ let coords =
 printfn "Coords:"
 Seq.iter (printfn "%A") coords
 
-let tree = Treap.Build coords
+let treap = Treap.Build coords
+let filename = $"""{DateTime.Now.ToString("MM-dd__HH-mm-ss")}.txt""";
 
-match tree with
-| None -> printfn "Tree not created"
-| Some treap ->
-    let filename = $"""{DateTime.Now.ToString("MM-dd__HH-mm-ss")}.txt""";
+using (File.Open(filename, FileMode.CreateNew)) (
+    fun fileStream ->
+        fileStream.Write(JsonSerializer.SerializeToUtf8Bytes(treap.ToString()))
+)
 
-    using (File.Open(filename, FileMode.CreateNew)) (
-        fun fileStream ->
-            fileStream.Write(JsonSerializer.SerializeToUtf8Bytes(treap.ToString()))
-    )
+printfn "_______"
+printfn "Treap: "
+printf "%A" treap
 
-    printfn "_______"
-    printfn "Treap: "
-    printf "%A" treap
-
-    printfn $"Treap saved to {filename}"
+printfn $"Treap saved to {filename}"
