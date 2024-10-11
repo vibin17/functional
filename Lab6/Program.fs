@@ -26,3 +26,12 @@ let treap = new Treap(coords)
 printfn "_______"
 printfn "Treap: "
 printf "%A" treap
+
+let intermediate = treap.GetIntermediateNodes()
+let leafs = treap.GetLeafs()
+
+printf "Intermediate:"
+printf "%A" intermediate
+
+printf "Leafs:"
+printf "%A" leafs
