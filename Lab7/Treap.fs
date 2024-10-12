@@ -7,7 +7,7 @@ open System.IO
 open System.Text
 open System.Text.Json
 
-type Treap<'T when 'T : comparison and 'T :> IComparable<'T>> (coords: ('T * 'T)[]) =
+type Treap<'T when 'T : comparison> (coords: ('T * 'T)[]) =
     interface ITreap<'T> with
         member val Root : Node<'T> = Treap.BuildTreeInternal (Array.sortBy (fun (x, y) -> x) coords) with get
 

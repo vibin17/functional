@@ -2,7 +2,7 @@
 
 open System
 
-type Node<'T when 'T :> IComparable<'T>> =
+type Node<'T when 'T : comparison> =
     | Empty
     | Node of x: 'T * y: 'T * left: Node<'T> * right: Node<'T>
 
@@ -11,7 +11,7 @@ type Node<'T when 'T :> IComparable<'T>> =
          | Node (x, y, _, _) -> $"({x}, {y})"
          | Empty -> "-"
 
-type ITreap<'T when 'T :> IComparable<'T>> =
+type ITreap<'T when 'T : comparison> =
     abstract member Root : Node<'T>
 
     abstract member GetLeafs: unit -> Node<'T>[]
