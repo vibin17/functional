@@ -5,7 +5,6 @@ open Treap
 
 open System
 open System.IO
-open System.Text.Json
 open System.Text.RegularExpressions
 
 let numberPattern = "-?\d+"
@@ -21,17 +20,33 @@ let coords =
 printfn "Coords:"
 Seq.iter (printfn "%A") coords
 
-let treap = new Treap(coords)
+let treap = new Treap (coords)
 
 printfn "_______"
 printfn "Treap: "
-printf "%A" treap
+printfn "%A" (treap)
 
-let intermediate = treap.GetIntermediateNodes()
+let intermediateNodes = treap.GetIntermediateNodes()
 let leafs = treap.GetLeafs()
 
-printf "Intermediate:"
-printf "%A" intermediate
+printfn "Root:"
+printfn "%O" (treap.Root)
 
-printf "Leafs:"
-printf "%A" leafs
+printfn "Intermediate:"
+Seq.iter (printfn "%O") (intermediateNodes)
+
+printfn "Leafs:"
+Seq.iter (printfn "%O") (leafs)
+
+let doubledTreap = treap.Map(fun (x, y) -> (2 * x, 2 * y))
+
+printfn "Doubled treap:"
+printf "%O" doubledTreap
+
+let evenNodes = treap.Filter(fun node ->
+    match node with 
+    | Empty -> false
+    | Node (x, y, _, _) -> (x % 2) = 0 && (y % 2) = 0)
+
+printfn "Even nodes:"
+Seq.iter (printfn "%O") (evenNodes)

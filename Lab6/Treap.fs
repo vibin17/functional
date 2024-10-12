@@ -9,43 +9,40 @@ type Node =
     | Empty
     | Node of x: int * y: int * left: Node * right: Node
 
-type Treap (coords : (int * int)[]) =
-    member val public Root = Treap.BuildTreeInternal (Array.sortBy (fun (x, y) -> x) coords) with get
+    override this.ToString() =
+         match this with
+         | Node (x, y, _, _) -> $"({x}, {y})"
+         | Empty -> "-"
+
+type Treap (coords: (int * int)[]) =
+    member val public Root : Node = Treap.BuildTreeInternal (Array.sortBy (fun (x, y) -> x) coords) with get
 
     member public this.GetLeafs() =
         Treap.FilterInternal this.Root (fun node -> 
             match node with 
-            | Empty -> false
-            | Node (x, y, left, right) ->
-                match left with 
-                | Empty -> 
-                    match right with 
-                    | Empty -> true
-                    | Node (_) -> false
-                | Node (_) -> false)
+            | Node (x, y, Empty, Empty) -> true
+            | _ -> false)
 
     member public this.GetIntermediateNodes() =
-        Treap.FilterInternal this.Root (fun node -> 
-            let mutable hasNodes = false
-            
-            match node with 
-            | Empty -> ()
-            | Node (_, _, left, right) ->
-                match left with 
-                | Empty -> ()
-                | Node (_) -> hasNodes <- true
-                match right with 
-                | Empty -> ()
-                | Node (_) -> hasNodes <- true
-
-            hasNodes
+        let filtered = Treap.FilterInternal this.Root (fun node -> 
+            match node with
+            | Empty -> false
+            | Node (_, _, Empty, Empty) -> false
+            | _ -> true
         )
+
+        if filtered.Length > 0 then
+            filtered[1..]
+
+        else filtered
 
     member public this.Filter (predicate: Node -> bool) : Node seq = 
         Treap.FilterInternal (this.Root) predicate
 
     member public this.Map (selector: int * int -> int * int) : Treap =
-        null
+        let mapped = Treap.MapInternal this.Root selector
+
+        new Treap(mapped)
 
     override this.ToString() =
          Treap.ToStringInternal this.Root 0
@@ -74,6 +71,16 @@ type Treap (coords : (int * int)[]) =
             let rightSubtree = Treap.BuildTreeInternal right
 
             Node (fst root, snd root, leftSubtree, rightSubtree)
+
+    static member private MapInternal (node: Node) (selector: int * int -> int * int) : (int * int)[] =
+       match node with
+       | Empty -> Array.empty
+       | Node (x, y, left, right) ->
+            let leftMapped = Treap.MapInternal left selector
+            let rightMapped = Treap.MapInternal right selector
+            let mappedXY = selector (x, y)
+
+            [| mappedXY; yield! leftMapped; yield! rightMapped |]
 
     static member private FilterInternal (node: Node) (predicate: Node -> bool): Node[] =
         match node with
